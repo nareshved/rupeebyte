@@ -133,10 +133,10 @@ static final AppDatabase instance = AppDatabase._();   // getter return database
 
     var data = await db.query(USER_TABLE, where: "$COLUMN_USER_EMAIL = ? and $COLUMN_USER_PASS = ?", whereArgs: [email, pass]);
 
-    // if(data.isNotEmpty){
-    //   var prefs = await SharedPreferences.getInstance();
-    //   prefs.setInt(LOGIN_UID, UserModel.fromMap(data[0]).user_id);
-    // }
+    if(data.isNotEmpty){
+      var prefs = await SharedPreferences.getInstance();
+      prefs.setInt(LOGIN_UID, UserModel.fromMap(data[0]).userId);
+    }
 
     return data.isNotEmpty;
   }
