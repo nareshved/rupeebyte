@@ -2,19 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:rupeebyte/bloc/expense_bloc.dart';
+import 'package:rupeebyte/bloc/expense_events.dart';
 import 'package:rupeebyte/bloc/expense_states.dart';
 import 'package:rupeebyte/constants/app_contants.dart';
+import 'package:rupeebyte/constants/date_time_utils/date_time_utils.dart';
 import '../models/date_wise_expense_model.dart';
 import '../models/expense_model.dart';
 import 'add_expense.dart';
 import 'dart:developer';
 
-class HomePage extends StatelessWidget {
-  HomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
+  @override
+  State<StatefulWidget> createState() {
+    return HomePageState();
+  }
+}
+
+class HomePageState extends State<HomePage> {
   List<DateWiseExpenseModel> dateWiseExpense = [];
 
-  var dateFormat = DateFormat.yMMMEd(); //my choice DateFormat.yMMMEd();
+//  var dateFormat = DateFormat.yMMMEd(); //my choice DateFormat.yMMMEd();
+
+  @override
+  void initState() {
+    super.initState();
+    // fetch all expense in home page before add new
+    BlocProvider.of<ExpenseBloc>(context).add(FetchAllExpenseEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,77 +48,80 @@ class HomePage extends StatelessWidget {
               ));
         },
       ),
-      body: BlocBuilder<ExpenseBloc, ExpenseStates>(
-        builder: (context, state) {
-          if (state is ExpenseLoadingState) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: SafeArea(
+        child: BlocBuilder<ExpenseBloc, ExpenseStates>(
+          builder: (context, state) {
+            if (state is ExpenseLoadingState) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state is ExpenseLoadedState) {
-            // state.mData.forEach((element) {
-            //   log(element.toMap().toString());
-            //   log("printing in log all Expense data for example");
-            // },);
+            if (state is ExpenseLoadedState) {
+              // state.mData.forEach((element) {
+              //   log(element.toMap().toString());
+              //   log("printing in log all Expense data for example");
+              // },);
 
-            filterDayWiseExpenses(state.mData);
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
-                itemCount: dateWiseExpense.length,
-                itemBuilder: (context, parentIndex) {
-                  var eachItem = dateWiseExpense[parentIndex];
+              filterDayWiseExpenses(state.mData);
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView.builder(
+                  itemCount: dateWiseExpense.length,
+                  itemBuilder: (context, parentIndex) {
+                    var eachItem = dateWiseExpense[parentIndex];
 
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(eachItem.date),
-                            Text(eachItem.totalAmt)
-                          ],
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: eachItem.allTransactions.length,
-                          itemBuilder: (context, childIndex) {
-                            var eachTrans =
-                                eachItem.allTransactions[childIndex];
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(eachItem.date),
+                              Text(eachItem.totalAmt)
+                            ],
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: eachItem.allTransactions.length,
+                            itemBuilder: (context, childIndex) {
+                              var eachTrans =
+                                  eachItem.allTransactions[childIndex];
 
-                            return ListTile(
-                              leading: Image.asset(
-                                  height: 30,
-                                  AppContants.mCategories[eachTrans.expCatType]
-                                      .catImgPath),
-                              title: Text(eachTrans.expTitle),
-                              subtitle: Text(eachTrans.expDesc),
-                              trailing: Column(
-                                children: [
-                                  Text(eachTrans.expAmount.toString()),
-                                  // main balance will added here
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            );
-          }
+                              return ListTile(
+                                leading: Image.asset(
+                                    height: 30,
+                                    AppContants
+                                        .mCategories[eachTrans.expCatType]
+                                        .catImgPath),
+                                title: Text(eachTrans.expTitle),
+                                subtitle: Text(eachTrans.expDesc),
+                                trailing: Column(
+                                  children: [
+                                    Text(eachTrans.expAmount.toString()),
+                                    // main balance will added here
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            }
 
-          if (state is ExpenseErrorState) {
-            return Center(
-              child: Text(state.errorMsg),
-            );
-          }
+            if (state is ExpenseErrorState) {
+              return Center(
+                child: Text(state.errorMsg),
+              );
+            }
 
-          return Container();
-        },
+            return Container();
+          },
+        ),
       ),
     );
   }
@@ -114,9 +133,13 @@ class HomePage extends StatelessWidget {
         []; // find each Dates all Expenses like today ke 5 expenses
 
     for (ExpenseModel eachExp in allExpenses) {
-      var eachDate =
-          DateTime.fromMillisecondsSinceEpoch(int.parse(eachExp.expTimeStamp));
-      var mDate = dateFormat.format(eachDate);
+      // var eachDate =
+      //     DateTime.fromMillisecondsSinceEpoch(int.parse(eachExp.expTimeStamp));
+      // var mDate = dateFormat.format(eachDate);
+      // log(mDate);
+
+      var mDate = DateTimeUtils.getFormatedDateFromMili(
+          int.parse(eachExp.expTimeStamp));
       log(mDate);
 
       if (!listUniqueDates.contains(mDate)) {
@@ -126,7 +149,7 @@ class HomePage extends StatelessWidget {
     }
     // log(listUniqueDates);
 
-    // listUniqueDates me jo unique dates h usme se eaxhDate k expenses find kar raha hu
+    // listUniqueDates me jo unique dates h usme se eachDate k expenses find kar raha hu
 
     for (String date in listUniqueDates) {
       List<ExpenseModel> eachDateExp = [];
@@ -136,9 +159,12 @@ class HomePage extends StatelessWidget {
       log(' this is date $listUniqueDates');
 
       for (ExpenseModel eachExp in allExpenses) {
-        var eachDate = DateTime.fromMillisecondsSinceEpoch(
+        // var eachDate = DateTime.fromMillisecondsSinceEpoch(
+        //     int.parse(eachExp.expTimeStamp));
+        // var mDate = dateFormat.format(eachDate);
+
+        var mDate = DateTimeUtils.getFormatedDateFromMili(
             int.parse(eachExp.expTimeStamp));
-        var mDate = dateFormat.format(eachDate);
 
         if (date == mDate) {
           eachDateExp.add(eachExp);
@@ -156,6 +182,28 @@ class HomePage extends StatelessWidget {
         }
       }
 
+      // creating for Today yesterday
+      // var todayDate = DateTime.now();
+      // var formattedTodayDate = dateFormat.format(todayDate);
+
+      var formattedTodayDate =
+          DateTimeUtils.getFormatedDateFromDateTime(DateTime.now());
+
+      if (formattedTodayDate == date) {
+        date = "Today";
+      }
+
+      // creating for yesterday
+      // var yesterdayDate = DateTime.now().subtract(const Duration(days: 1));
+      // var formattedyesterdayDate = dateFormat.format(yesterdayDate);
+
+      var formattedyesterdayDate = DateTimeUtils.getFormatedDateFromDateTime(
+          DateTime.now().subtract(const Duration(days: 1)));
+
+      if (formattedyesterdayDate == date) {
+        date = "yesterday";
+      }
+
       dateWiseExpense.add(DateWiseExpenseModel(
           allTransactions: eachDateExp,
           date: date,
@@ -163,6 +211,6 @@ class HomePage extends StatelessWidget {
     }
 
     // log(dateWiseExpense.toString());
-    log("This is date wise expense ${dateWiseExpense[0].allTransactions.toString()}");
+    //   log("This is date wise expense ${dateWiseExpense[0].allTransactions.toString()}");
   }
 }

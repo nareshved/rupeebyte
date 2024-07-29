@@ -7,24 +7,24 @@ import 'package:sqflite/sqflite.dart';
 import '../models/user_model.dart';
 
 class AppDatabase {
-
 // private constructor singleton
-AppDatabase._();  /// private databse anyone can t aceesss directly purpose
+  AppDatabase._();
 
-static final AppDatabase instance = AppDatabase._();   // getter return database constructor for me whole app
+  /// private databse anyone can t aceesss directly purpose
 
- Database? mydb;
+  static final AppDatabase instance =
+      AppDatabase._(); // getter return database constructor for me whole app
 
- // login prefs user uid
+  Database? mydb;
+
+  // login prefs user uid
 
   static const String LOGIN_UID = "uid";
-
 
   // total table names
 
   static const String EXP_TABLE = "expense";
   static const String USER_TABLE = "users";
-
 
   // users column
 
@@ -33,113 +33,97 @@ static final AppDatabase instance = AppDatabase._();   // getter return database
   static const String COLUMN_USER_EMAIL = "uEmail";
   static const String COLUMN_USER_PASS = "uPass";
 
-
   // expense column
 
   static const String COLUMN_EXPENSE_ID = "expId";
   static const String COLUMN_EXPENSE_TITLE = "expTitle";
   static const String COLUMN_EXPENSE_DESC = "expDesc";
-  static const String COLUMN_EXPENSE_TIMESTAMP = "expTimeStamp";   // exp kab add hua
-  static const String COLUMN_EXPENSE_AMOUNT = "expAmount";         // kitna kharcha hua
-  static const String COLUMN_EXPENSE_BALANCE = "expBalance";        // total amount
-  static const String COLUMN_EXPENSE_TYPE = "expType";        // 0 for debit or 1 for credit
-  static const String COLUMN_EXPENSE_CAT_TYPE = "expCatType";        // exp category type like petrol or salon
-  
-  
-  
+  static const String COLUMN_EXPENSE_TIMESTAMP =
+      "expTimeStamp"; // exp kab add hua
+  static const String COLUMN_EXPENSE_AMOUNT = "expAmount"; // kitna kharcha hua
+  static const String COLUMN_EXPENSE_BALANCE = "expBalance"; // total amount
+  static const String COLUMN_EXPENSE_TYPE =
+      "expType"; // 0 for debit or 1 for credit
+  static const String COLUMN_EXPENSE_CAT_TYPE =
+      "expCatType"; // exp category type like petrol or salon
+
   // Database? mydb;
-  
-  Future<Database> initDB () async {
-  
-  var docDirectory = await getApplicationDocumentsDirectory();
 
-  var dbPathPhone = join(docDirectory.path, "Rupeebyte.db");
+  Future<Database> initDB() async {
+    var docDirectory = await getApplicationDocumentsDirectory();
 
-  return openDatabase(
-    dbPathPhone, 
-    version: 1, 
-    onCreate: (db, version) async {
+    var dbPathPhone = join(docDirectory.path, "Rupeebyte.db");
 
-      // create all your table are here....
+    return openDatabase(
+      dbPathPhone,
+      version: 1,
+      onCreate: (db, version) async {
+        // create all your table are here....
 
+        // user table
+        db.execute(
+            "create table $USER_TABLE ( $COLUMN_USER_ID integer primary key autoincrement, $COLUMN_USER_NAME text, $COLUMN_USER_EMAIL text, $COLUMN_USER_PASS text ) ");
 
-    // user table
-      db.execute("create table $USER_TABLE ( $COLUMN_USER_ID integer primary key autoincrement, $COLUMN_USER_NAME text, $COLUMN_USER_EMAIL text, $COLUMN_USER_PASS text ) ");
+        // expense table
+        db.execute(
+            "create table $EXP_TABLE ( $COLUMN_EXPENSE_ID integer primary key autoincrement, $COLUMN_USER_ID integer, $COLUMN_EXPENSE_TITLE text, $COLUMN_EXPENSE_DESC text, $COLUMN_EXPENSE_TIMESTAMP text, $COLUMN_EXPENSE_AMOUNT real, $COLUMN_EXPENSE_BALANCE real, $COLUMN_EXPENSE_TYPE integer, $COLUMN_EXPENSE_CAT_TYPE integer )");
+      },
+    );
 
-
-   // expense table
-      db.execute("create table $EXP_TABLE ( $COLUMN_EXPENSE_ID integer primary key autoincrement, $COLUMN_USER_ID integer, $COLUMN_EXPENSE_TITLE text, $COLUMN_EXPENSE_DESC text, $COLUMN_EXPENSE_TIMESTAMP text, $COLUMN_EXPENSE_AMOUNT real, $COLUMN_EXPENSE_BALANCE real, $COLUMN_EXPENSE_TYPE integer, $COLUMN_EXPENSE_CAT_TYPE integer )");
-    
-  },);
-
-
-  //  db.execute(
-  //           "create table $EXP_TABLE ( $COLUMN_EXPENSE_ID integer primary key autoincrement, $COLUMN_USER_ID integer, $COLUMN_EXPENSE_TITLE text, $COLUMN_EXPENSE_DESC text, $COLUMN_EXPENSE_TIMESTAMP text, $COLUMN_EXPENSE_AMOUNT real, $COLUMN_EXPENSE_BALANCE real, $COLUMN_EXPENSE_TYPE integer, $COLUMN_EXPENSE_CAT_TYPE integer )");
-  //     },
-  //   );
-
+    //  db.execute(
+    //           "create table $EXP_TABLE ( $COLUMN_EXPENSE_ID integer primary key autoincrement, $COLUMN_USER_ID integer, $COLUMN_EXPENSE_TITLE text, $COLUMN_EXPENSE_DESC text, $COLUMN_EXPENSE_TIMESTAMP text, $COLUMN_EXPENSE_AMOUNT real, $COLUMN_EXPENSE_BALANCE real, $COLUMN_EXPENSE_TYPE integer, $COLUMN_EXPENSE_CAT_TYPE integer )");
+    //     },
+    //   );
   }
-
 
   Future<Database> getDB() async {
-     if(mydb != null) {
+    if (mydb != null) {
       return mydb!;
-     } else {
+    } else {
       mydb = await initDB();
       return mydb!;
-     }
-
+    }
   }
 
-
-
   // Database functions
-  
-   Future<int> getUID () async {
 
+  Future<int> getUID() async {
     var prefs = await SharedPreferences.getInstance();
     var uid = prefs.getInt(AppDatabase.LOGIN_UID);
-    return uid ?? 0 ;
-   } 
+    return uid ?? 0;
+  }
 
-
-   Future<bool> createAccount ( UserModel newUser ) async {
-
+  Future<bool> createAccount(UserModel newUser) async {
     var check = await checkIfUserAlreadyExist(newUser.userEmail);
 
-    if(!check) {
-
+    if (!check) {
       // create user
-      var db = await getDB ();
+      var db = await getDB();
       db.insert(USER_TABLE, newUser.toMap());
       return true;
+    } else {
+      return false; // Accoumt not created
     }
-       else {
-        return false;  // Accoumt not created
-       }
-   }
+  }
 
-
-
-
-   Future<bool> checkIfUserAlreadyExist ( String email ) async {
-
-   var db = await getDB (); 
- 
-   var data = await db.query(USER_TABLE, where: "$COLUMN_USER_EMAIL = ? ", whereArgs: [email]);
-
-   return data.isNotEmpty;
-
-   }
-
-
-   ///login
-  Future<bool> authenticateUser(String email, String pass) async{
+  Future<bool> checkIfUserAlreadyExist(String email) async {
     var db = await getDB();
 
-    var data = await db.query(USER_TABLE, where: "$COLUMN_USER_EMAIL = ? and $COLUMN_USER_PASS = ?", whereArgs: [email, pass]);
+    var data = await db.query(USER_TABLE,
+        where: "$COLUMN_USER_EMAIL = ? ", whereArgs: [email]);
 
-    if(data.isNotEmpty){
+    return data.isNotEmpty;
+  }
+
+  ///login
+  Future<bool> authenticateUser(String email, String pass) async {
+    var db = await getDB();
+
+    var data = await db.query(USER_TABLE,
+        where: "$COLUMN_USER_EMAIL = ? and $COLUMN_USER_PASS = ?",
+        whereArgs: [email, pass]);
+
+    if (data.isNotEmpty) {
       var prefs = await SharedPreferences.getInstance();
       prefs.setInt(LOGIN_UID, UserModel.fromMap(data[0]).userId);
     }
@@ -147,40 +131,27 @@ static final AppDatabase instance = AppDatabase._();   // getter return database
     return data.isNotEmpty;
   }
 
-   // add new Expense
-    Future<bool> addExpense (ExpenseModel newExpense ) async  {
-      var db = await getDB();
+  // add new Expense
+  Future<bool> addExpense(ExpenseModel newExpense) async {
+    var db = await getDB();
 
-       int rowsEffected = await db.insert(EXP_TABLE, newExpense.toMap());
-      
-      return rowsEffected>0;
-    }
+    int rowsEffected = await db.insert(EXP_TABLE, newExpense.toMap());
 
+    return rowsEffected > 0;
+  }
 
   // fetch all Expenses
-    Future<List<ExpenseModel>> fetchAllExpense () async {
-      var db = await getDB();
-      var data = await db.query(EXP_TABLE);
+  Future<List<ExpenseModel>> fetchAllExpense() async {
+    var db = await getDB();
+    var data =
+        await db.query(EXP_TABLE, orderBy: "$COLUMN_EXPENSE_TIMESTAMP DESC");
 
-      List<ExpenseModel> listExp = [];
+    List<ExpenseModel> listExp = [];
 
-      for(Map<String, dynamic> eachExp in data) {
-        listExp.add(ExpenseModel.fromMap(eachExp));
-      }
-
-      return listExp;
+    for (Map<String, dynamic> eachExp in data) {
+      listExp.add(ExpenseModel.fromMap(eachExp));
     }
 
-    
-
-
-  
-
-
-
-
-
-
-
-
-   }  // Appdatabse class end
+    return listExp;
+  }
+}  // Appdatabse class end
