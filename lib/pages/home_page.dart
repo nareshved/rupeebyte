@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:rupeebyte/bloc/expense_bloc.dart';
 import 'package:rupeebyte/bloc/expense_events.dart';
 import 'package:rupeebyte/bloc/expense_states.dart';
 import 'package:rupeebyte/constants/app_contants.dart';
+import 'package:rupeebyte/constants/dark_theme_manager/dark_theme.dart';
 import 'package:rupeebyte/constants/date_time_utils/date_time_utils.dart';
 import '../models/date_wise_expense_model.dart';
 import '../models/expense_model.dart';
@@ -34,9 +34,21 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var mq = MediaQuery.of(context);
+    // var mWidth = mq.size.width;
+    // var mHeight = mq.size.height;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Home Expense"),
+        actions: [
+          Switch(
+            value: context.watch<ThemeProvider>().themeValue,
+            onChanged: (value) {
+              context.read<ThemeProvider>().themeValue = value;
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
@@ -62,55 +74,9 @@ class HomePageState extends State<HomePage> {
               // },);
 
               filterDayWiseExpenses(state.mData);
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListView.builder(
-                  itemCount: dateWiseExpense.length,
-                  itemBuilder: (context, parentIndex) {
-                    var eachItem = dateWiseExpense[parentIndex];
-
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(eachItem.date),
-                              Text(eachItem.totalAmt)
-                            ],
-                          ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: eachItem.allTransactions.length,
-                            itemBuilder: (context, childIndex) {
-                              var eachTrans =
-                                  eachItem.allTransactions[childIndex];
-
-                              return ListTile(
-                                leading: Image.asset(
-                                    height: 30,
-                                    AppContants
-                                        .mCategories[eachTrans.expCatType]
-                                        .catImgPath),
-                                title: Text(eachTrans.expTitle),
-                                subtitle: Text(eachTrans.expDesc),
-                                trailing: Column(
-                                  children: [
-                                    Text(eachTrans.expAmount.toString()),
-                                    // main balance will added here
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              );
+              return mq.orientation == Orientation.landscape
+                  ? landscapLay()
+                  : portraitLay();
             }
 
             if (state is ExpenseErrorState) {
@@ -123,6 +89,109 @@ class HomePageState extends State<HomePage> {
           },
         ),
       ),
+    );
+  }
+
+  // portrait layout UI
+  Widget portraitLay() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Expanded(
+              child: Container(
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Your balance", style: TextStyle(fontSize: 20)),
+                  Text(
+                    "0.0000",
+                    style: TextStyle(fontSize: 28),
+                  ),
+                ],
+              ),
+            ),
+          )),
+          Expanded(flex: 2, child: mainLay()),
+        ],
+      ),
+    );
+  }
+
+  // lanscape layout UI
+  Widget landscapLay() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Expanded(
+              flex: 3,
+              child: Container(
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Your balance", style: TextStyle(fontSize: 20)),
+                      Text(
+                        "0.0000",
+                        style: TextStyle(fontSize: 28),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+          Expanded(
+            flex: 3,
+            child: mainLay(),
+          ),
+        ],
+      ),
+    );
+  }
+
+// main layout UI
+  Widget mainLay() {
+    return ListView.builder(
+      itemCount: dateWiseExpense.length,
+      itemBuilder: (context, parentIndex) {
+        var eachItem = dateWiseExpense[parentIndex];
+
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [Text(eachItem.date), Text(eachItem.totalAmt)],
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: eachItem.allTransactions.length,
+                itemBuilder: (context, childIndex) {
+                  var eachTrans = eachItem.allTransactions[childIndex];
+
+                  return ListTile(
+                    leading: Image.asset(
+                        height: 30,
+                        AppContants
+                            .mCategories[eachTrans.expCatType].catImgPath),
+                    title: Text(eachTrans.expTitle),
+                    subtitle: Text(eachTrans.expDesc),
+                    trailing: Column(
+                      children: [
+                        Text(eachTrans.expAmount.toString()),
+                        // main balance will added here
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
