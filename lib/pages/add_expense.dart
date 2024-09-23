@@ -8,7 +8,7 @@ import 'package:rupeebyte/widgets/elevated_button.dart';
 import 'package:rupeebyte/widgets/text_form_field.dart';
 import 'dart:developer';
 
-import '../constants/app_contants.dart';
+import '../constants/app_constants.dart';
 
 // stateful because dropDownMenu is Required for value onChanged setState
 
@@ -16,7 +16,9 @@ import '../constants/app_contants.dart';
 // var mCategoriesSelectedIndex = -1;
 
 class AddExpensePage extends StatefulWidget {
-  const AddExpensePage({super.key});
+  AddExpensePage({super.key, required this.balance});
+
+  num balance;
 
   @override
   State<StatefulWidget> createState() {
@@ -124,6 +126,10 @@ class AddExpensePageState extends State<AddExpensePage> {
                           return InkWell(
                             onTap: () {
                               mCategoriesSelectedIndex = index;
+
+                              // select id instead
+                           //   eachCat.catId;   store in database
+
                               setState(() {
                                 log("$mCategoriesSelectedIndex  is index updated");
                               });
@@ -164,6 +170,14 @@ class AddExpensePageState extends State<AddExpensePage> {
                 eElevatedBtn(
                   btnName: "Add Expense",
                   onTap: () {
+                    var mBalance = widget.balance;
+
+                    if (selectedTransactionType == "Debit") {
+                      mBalance -= int.parse(amountController.text.toString());
+                    } else {
+                      mBalance += int.parse(amountController.text.toString());
+                    }
+
                     var newExpense = ExpenseModel(
                         uId: 0, //  uId: AppDatabase.LOGIN_UID, store prefs UId
                         expType: selectedTransactionType == "Debit" ? 0 : 1,
@@ -173,7 +187,7 @@ class AddExpensePageState extends State<AddExpensePage> {
                         expId: 0,
                         expDesc: descController.text.toString(),
                         expCatType: mCategoriesSelectedIndex,
-                        expBalance: 0,
+                        expBalance: mBalance,
                         expAmount: int.parse(amountController.text.toString()));
 
                     BlocProvider.of<ExpenseBloc>(context)

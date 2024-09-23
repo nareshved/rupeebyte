@@ -34,16 +34,31 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+ 
 
 
 
-
-// high order function
+// // high order function
 
 // void myFun ( Function (int, int) mfun){
 //  print (myfun (5,6));
 // }
 
-// void main (){
-//  runApp()
-//}
+// void show(){
+//   print('enter a value:');
+//   int a = Stdin.readlinesync()!;
+  
+// }
+
+// void add(int a, int b){
+
+//   myFun(show(10,20));
+//   print(a+b);
+// }
+
+// // nested func 
+// // onPressweed: (){}
+
+// // void main (){
+// //  runApp()
+// //}

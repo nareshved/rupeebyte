@@ -3,13 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rupeebyte/bloc/expense_bloc.dart';
 import 'package:rupeebyte/bloc/expense_events.dart';
 import 'package:rupeebyte/bloc/expense_states.dart';
-import 'package:rupeebyte/constants/app_contants.dart';
+import 'package:rupeebyte/constants/app_constants.dart';
 import 'package:rupeebyte/constants/dark_theme_manager/dark_theme.dart';
 import 'package:rupeebyte/constants/date_time_utils/date_time_utils.dart';
 import '../models/date_wise_expense_model.dart';
 import '../models/expense_model.dart';
 import 'add_expense.dart';
-import 'dart:developer';
+
+import 'stats_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,15 +22,21 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+
   List<DateWiseExpenseModel> dateWiseExpense = [];
+  List<ExpenseModel> allExpenses = [];  // for passing data to stats graphs page to filterCatWiseData
+ // List<MonthWiseExpenseModel> monthWiseExpensenK = [];
 
 //  var dateFormat = DateFormat.yMMMEd(); //my choice DateFormat.yMMMEd();
+
+  num lastBalance = 0.0;
 
   @override
   void initState() {
     super.initState();
     // fetch all expense in home page before add new
     BlocProvider.of<ExpenseBloc>(context).add(FetchAllExpenseEvent());
+    // filterExpenseMonthWise(allExpenses: list);
   }
 
   @override
@@ -50,15 +57,29 @@ class HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AddExpensePage(),
-              ));
-        },
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => StatsPage(mData: allExpenses,)));
+            },
+            child: const Icon(Icons.bar_chart),
+          ),
+          FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddExpensePage(
+                      balance: lastBalance,
+                    ),
+                  ));
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: BlocBuilder<ExpenseBloc, ExpenseStates>(
@@ -73,10 +94,33 @@ class HomePageState extends State<HomePage> {
               //   log("printing in log all Expense data for example");
               // },);
 
-              filterDayWiseExpenses(state.mData);
-              return mq.orientation == Orientation.landscape
-                  ? landscapLay()
-                  : portraitLay();
+              if (state.mData.isNotEmpty) {
+                // lastBalance declare var above in the class
+                // lastBalance = state.mData.last.expBalance.toDouble();
+
+                updateBalance(state.mData); // updating balance
+
+                /// sir mont hwise Expense ...................
+                //  filterExpenseMonthWise(allExpenses: state.mData);
+                // return MainlayMonthWiseExpenses(
+                //   monthWiseExpensenK: monthWiseExpensenK,
+                // );
+
+                // filterMonthWiseExpenses(state.mData);
+
+                filterDayWiseExpenses(state.mData);
+                allExpenses = state.mData; // saved to catWiseData to pass
+                return mq.orientation == Orientation.landscape
+                    ? landscapLay()
+                    : portraitLay();
+              } else {
+                return const Center(
+                  child: Text(
+                    "NO Expense found add new!!!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                );
+              }
             }
 
             if (state is ExpenseErrorState) {
@@ -92,27 +136,40 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  void updateBalance(List<ExpenseModel> mData) {
+    //  finding last balance beacause issue i am ordering change of databsase column orderBy expBal
+    var lastTransactionId = -1;
+
+    for (ExpenseModel exp in mData) {
+      if (exp.expId > lastTransactionId) {
+        lastTransactionId = exp.expId;
+      }
+    }
+
+    // var lastExpBalance = mData
+    //     .firstWhere(
+    //       (element) => element.expId == lastTransactionId,
+    //     ).expBalance;        // is same like lastExpBalance.where jab ek hi var uthana ho
+
+    var lastExpBalance = mData
+        .where(
+          (element) => element.expId == lastTransactionId,
+        )
+        .toList()[0]
+        .expBalance;
+
+    lastBalance = lastExpBalance;
+
+    //
+  }
+
   // portrait layout UI
   Widget portraitLay() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Expanded(
-              child: Container(
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Your balance", style: TextStyle(fontSize: 20)),
-                  Text(
-                    "0.0000",
-                    style: TextStyle(fontSize: 28),
-                  ),
-                ],
-              ),
-            ),
-          )),
+          Expanded(child: balanceHander()),
           Expanded(flex: 2, child: mainLay()),
         ],
       ),
@@ -125,22 +182,12 @@ class HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          Expanded(
-              flex: 3,
-              child: Container(
-                child: const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Your balance", style: TextStyle(fontSize: 20)),
-                      Text(
-                        "0.0000",
-                        style: TextStyle(fontSize: 28),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
+          // ElevatedButton(
+          //     onPressed: () {
+          //       saveName();
+          //     },
+          //     child: const Text('presssed')),
+          Expanded(flex: 3, child: balanceHander()),
           Expanded(
             flex: 3,
             child: mainLay(),
@@ -182,6 +229,7 @@ class HomePageState extends State<HomePage> {
                     trailing: Column(
                       children: [
                         Text(eachTrans.expAmount.toString()),
+                        Text(eachTrans.expBalance.toString()),
                         // main balance will added here
                       ],
                     ),
@@ -192,6 +240,22 @@ class HomePageState extends State<HomePage> {
           ),
         );
       },
+    );
+  }
+
+// balance showing widget in homePage
+  Widget balanceHander() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("Your balance", style: TextStyle(fontSize: 20)),
+          Text(
+            "$lastBalance",
+            style: const TextStyle(fontSize: 28),
+          ),
+        ],
+      ),
     );
   }
 
@@ -209,7 +273,7 @@ class HomePageState extends State<HomePage> {
 
       var mDate = DateTimeUtils.getFormatedDateFromMili(
           int.parse(eachExp.expTimeStamp));
-      log(mDate);
+      // log(mDate);
 
       if (!listUniqueDates.contains(mDate)) {
         // mDate list me nahi h to mDate ko add karo
@@ -224,8 +288,8 @@ class HomePageState extends State<HomePage> {
       List<ExpenseModel> eachDateExp = [];
       var totalAmt = 0.0;
 
-      log(' this is date $date');
-      log(' this is date $listUniqueDates');
+      // log(' this is date $date');
+      // log(' this is date $listUniqueDates');
 
       for (ExpenseModel eachExp in allExpenses) {
         // var eachDate = DateTime.fromMillisecondsSinceEpoch(
@@ -237,7 +301,7 @@ class HomePageState extends State<HomePage> {
 
         if (date == mDate) {
           eachDateExp.add(eachExp);
-          log("this is each date ${eachDateExp.toString()}");
+       //   log("this is each date ${eachDateExp.toString()}");
 
           if (eachExp.expType == 0) {
             // Debit
@@ -246,8 +310,6 @@ class HomePageState extends State<HomePage> {
             // Credit
             totalAmt += eachExp.expAmount;
           }
-        } else {
-          log('else');
         }
       }
 
@@ -266,10 +328,10 @@ class HomePageState extends State<HomePage> {
       // var yesterdayDate = DateTime.now().subtract(const Duration(days: 1));
       // var formattedyesterdayDate = dateFormat.format(yesterdayDate);
 
-      var formattedyesterdayDate = DateTimeUtils.getFormatedDateFromDateTime(
+      var formattedYesterdayDate = DateTimeUtils.getFormatedDateFromDateTime(
           DateTime.now().subtract(const Duration(days: 1)));
 
-      if (formattedyesterdayDate == date) {
+      if (formattedYesterdayDate == date) {
         date = "yesterday";
       }
 
@@ -282,4 +344,106 @@ class HomePageState extends State<HomePage> {
     // log(dateWiseExpense.toString());
     //   log("This is date wise expense ${dateWiseExpense[0].allTransactions.toString()}");
   }
+
+  // List<MonthWiseExpenseModel> filterMonthWiseExpenses(
+  //   List<ExpenseModel> allExpenses,
+  // ) {
+  //   List<MonthWiseExpenseModel> monthWiseExpenses = [];
+
+  //   var listUniqueMonths =
+  //       []; // find each Dates all Expenses like today ke 5 expenses
+
+  //   for (int i =0; i < allExpenses  .length; i++) {
+  //     var createdAt = allExpenses[i].expTimeStamp;
+
+  //     var mMonth = DateTimeUtils.getFormatedMonthFromMili(
+  //         int.parse(eachExp.expTimeStamp));
+  //     // log(mMonth);
+
+  //     if (!listUniqueMonths.contains(mMonth)) {
+  //       // mDate list me nahi h to mDate ko add karo
+  //       listUniqueMonths.add(mMonth);
+  //     }
+  //   }
+  //   // log(listUniqueDates);
+  //   log(listUniqueMonths.toString());
+
+  //   for (String month in listUniqueMonths) {
+  //     List<ExpenseModel> thisMonthExpenses = [];
+  //     num thisMonthBal = 0.0;
+
+  //     for (ExpenseModel eachExp in allExpenses) {
+  //       var mMonth = DateTimeUtils.getFormatedMonthFromMili(
+  //           int.parse(eachExp.expTimeStamp));
+
+  //       if (month == mMonth) {
+  //         thisMonthExpenses.add(eachExp);
+  //         //   log("this is each date ${eachDateExp.toString()}");
+
+  //         if (eachExp.expType == 0) {
+  //           // Debit
+  //           thisMonthBal -= eachExp.expAmount;
+  //         } else {
+  //           // Credit
+  //           thisMonthBal += eachExp.expAmount;
+  //         }
+  //       }
+  //     }
+
+  //     monthWiseExpenses.add(MonthWiseExpenseModel(
+  //         allTransactions: thisMonthExpenses,
+  //         month: month,
+  //         totalAmt: thisMonthBal.toString()));
+
+  //     monthWiseExpensenK.add(MonthWiseExpenseModel(
+  //         allTransactions: thisMonthExpenses,
+  //         month: month,
+  //         totalAmt: thisMonthBal.toString()));
+  //   }
+
+  //   return monthWiseExpenses;
+  // }
+
+  // void filterExpenseMonthWise({required List<ExpenseModel> allExpenses}) {
+  //   // listFilterExpModel.clear();
+  //   /// find the unique dates
+  //   List<String> uniqueMonths = [];
+  //   for (int i = 0; i < allExpenses.length; i++) {
+  //     var createdAt = allExpenses[i].expTimeStamp;
+  //     var mDateTime = DateTime.fromMillisecondsSinceEpoch(int.parse(createdAt));
+  //     var eachExpenseMonth = DateTimeUtils.monthDateFormate.format(mDateTime);
+  //     var eachExpenseYear = DateTimeUtils.yearFormat.format(mDateTime);
+  //     print("$eachExpenseMonth-$eachExpenseYear");
+  //     var eachExpenseMonthYear = "$eachExpenseMonth-$eachExpenseYear";
+  //     if (!uniqueMonths.contains(eachExpenseMonthYear)) {
+  //       uniqueMonths.add(eachExpenseMonthYear);
+  //     }
+  //     print(uniqueMonths);
+  //   }
+  //   for (String eachMonth in uniqueMonths) {
+  //     num totalExpAmt = 0.0;
+  //     List<ExpenseModel> eachMonthExpenses = [];
+  //     for (ExpenseModel eachExpense in allExpenses) {
+  //       var createdAt = eachExpense.expTimeStamp;
+  //       var mDateTime =
+  //           DateTime.fromMillisecondsSinceEpoch(int.parse(createdAt));
+  //       var eachExpenseMonth = DateTimeUtils.monthFormat;
+  //       var eachExpenseYear = DateTimeUtils.yearFormat.format(mDateTime);
+  //       var eachExpenseMonthYear = "$eachExpenseMonth-$eachExpenseYear";
+  //       if (eachExpenseMonthYear == eachMonth) {
+  //         eachMonthExpenses.add(eachExpense);
+  //         if (eachExpense.expCatType == "Debit") {
+  //           totalExpAmt -= eachExpense.expAmount;
+  //         } else {
+  //           totalExpAmt += eachExpense.expAmount;
+  //         }
+  //       }
+  //     }
+  //     monthWiseExpensenK.add(MonthWiseExpenseModel(
+  //         month: eachMonth,
+  //         totalAmt: totalExpAmt.toString(),
+  //         allTransactions: eachMonthExpenses));
+  //   }
+  //   print("this is month wise ${monthWiseExpensenK.length}");
+  // }
 }

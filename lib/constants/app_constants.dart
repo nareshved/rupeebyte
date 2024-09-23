@@ -20,7 +20,6 @@ class AppContants {
     CategoryModel(catId: 9, catTitle: "Shoppng", catImgPath: ImagesContants.IMG_PATH_SHOPPING, ),
     CategoryModel(catId: 10, catTitle: "Salon", catImgPath: ImagesContants.IMG_PATH_SALON, ),
     CategoryModel(catId: 11, catTitle: "Medicine", catImgPath: ImagesContants.IMG_PATH_MEDICINE, ),
-
   ];  // end list
 }
 
