@@ -102,7 +102,7 @@ class AppDatabase {
       db.insert(USER_TABLE, newUser.toMap());
       return true;
     } else {
-      return false; // Accoumt not created
+      return false; // Account not created
     }
   }
 
@@ -154,4 +154,4 @@ class AppDatabase {
 
     return listExp;
   }
-}  // Appdatabse class end
+}  // AppDatabase class end

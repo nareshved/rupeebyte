@@ -38,59 +38,66 @@ class _StatsPageState extends State<StatsPage> {
       //   children: [Expanded(child: Container()), Expanded(child: Container())],
       // ),
 
-      body: Column(
-        children: [
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: DChartBarO(
-              groupList: listOrdinalGrp,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: DChartBarO(
+                fillColor: (group, ordinalData, index) {
+                  return Colors.lightBlueAccent;
+
+                },
+                groupList: listOrdinalGrp,
+              ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: catWiseData.length,
-              itemBuilder: (context, parentIndex) {
-                var eachItem = catWiseData[parentIndex];
-            
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text(eachItem.catName), Text(eachItem.totalAmt)],
-                      ),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: eachItem.allTransactions.length,
-                        itemBuilder: (context, childIndex) {
-                          var eachTrans = eachItem.allTransactions[childIndex];
-            
-                          return ListTile(
-                            leading: Image.asset(
-                                height: 30,
-                                AppContants
-                                    .mCategories[eachTrans.expCatType].catImgPath),
-                            title: Text(eachTrans.expTitle),
-                            subtitle: Text(eachTrans.expDesc),
-                            trailing: Column(
-                              children: [
-                                Text(eachTrans.expAmount.toString()),
-                                Text(eachTrans.expBalance.toString()),
-                                // main balance will added here
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
+            Expanded(
+              child: ListView.builder(
+                itemCount: catWiseData.length,
+                itemBuilder: (context, parentIndex) {
+                  var eachItem = catWiseData[parentIndex];
+
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [Text(eachItem.catName), Text(eachItem.totalAmt)],
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: eachItem.allTransactions.length,
+                          itemBuilder: (context, childIndex) {
+                            var eachTrans = eachItem.allTransactions[childIndex];
+
+                            return ListTile(
+                              leading: Image.asset(
+                                  height: 30,
+                                  AppContants
+                                      .mCategories[eachTrans.expCatType].catImgPath),
+                              title: Text(eachTrans.expTitle),
+                              subtitle: Text(eachTrans.expDesc),
+                              trailing: Column(
+                                children: [
+                                  Text(eachTrans.expAmount.toString()),
+                                  Text(eachTrans.expBalance.toString()),
+                                  // main balance will added here
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -120,6 +127,11 @@ class _StatsPageState extends State<StatsPage> {
 
       if(catTrans.isNotEmpty) { // empty transactions amount not added to this page above list catWiseData
       catWiseData.add(CatWiseExpenseModel(allTransactions: catTrans, catName: catName, totalAmt: eachCatAmt.toString()));
-    } }
+
+      listOrdinalData.add(OrdinalData(domain: catName, measure: eachCatAmt.isNegative ? eachCatAmt*-1 : eachCatAmt)); // isNegative for eachCatAmt in minus so not show Graph is down
+    }
+    }
+    
+    listOrdinalGrp.add(OrdinalGroup(id: "1", data: listOrdinalData));
   }
 }

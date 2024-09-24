@@ -18,7 +18,7 @@ class ExpenseBloc extends Bloc<ExpenseEvents, ExpenseStates> {
         if (check) {
           var mExp = await db.fetchAllExpense();
           emit(ExpenseLoadedState(mData: mExp));
-          log("expense added!! thanks you");
+          log("expense added!! thank you");
         } else {
           emit(
               ExpenseErrorState(errorMsg: "your Expense not! added try again"));
@@ -32,7 +32,7 @@ class ExpenseBloc extends Bloc<ExpenseEvents, ExpenseStates> {
         emit(ExpenseLoadingState());
         var mExp = await db.fetchAllExpense();
         emit(ExpenseLoadedState(mData: mExp));
-        log("fetched all Expenses from Database inn bloc");
+        log("fetched all Expenses from Database in bloc");
       },
     );
   }

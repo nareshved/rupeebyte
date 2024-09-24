@@ -39,7 +39,7 @@ class ExpenseModel {
   Map<String, dynamic> toMap() {
     return {
       AppDatabase.COLUMN_USER_ID:
-          uId, // each user Id  // expCatId is Auotoincrement h isliye nahi liya
+          uId, // each user Id  // expCatId is Autoincrement h isliye nahi liya
       AppDatabase.COLUMN_EXPENSE_TITLE: expTitle,
       AppDatabase.COLUMN_EXPENSE_DESC: expDesc,
       AppDatabase.COLUMN_EXPENSE_TIMESTAMP: expTimeStamp,
