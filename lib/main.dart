@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:rupeebyte/bloc/expense_bloc.dart';
 import 'package:rupeebyte/constants/dark_theme_manager/dark_theme.dart';
 import 'package:rupeebyte/database/app_database.dart';
-import 'package:rupeebyte/pages/home_page.dart';
+
+import 'widgets/bottom_navigation_bar/bottom_nav_bar.dart';
 
 void main() {
   runApp(BlocProvider(
@@ -30,12 +31,12 @@ class MyApp extends StatelessWidget {
           : ThemeMode.light,
       debugShowCheckedModeBanner: false,
       title: 'Rupee byte',
-      darkTheme: ThemeData.dark(),
+      darkTheme: ThemeData.dark(useMaterial3: true),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const ExpenseBottomNavbarHome(),
     );
   }
 }

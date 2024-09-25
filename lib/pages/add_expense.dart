@@ -62,139 +62,157 @@ class AddExpensePageState extends State<AddExpensePage> {
             child: Column(
               children: [
                 mTextformFeild(
-                    mController: titleController, mHint: "name Expense"),
+                    mController: titleController, mHint: "Expense Name"),
                 SizedBox(
-                  height: mq.height * 0.012,
+                  height: mq.height * 0.025,
                 ),
                 mTextformFeild(
-                    mController: descController, mHint: "enter Description"),
+                    mController: descController, mHint: "Expense Description"),
                 SizedBox(
-                  height: mq.height * 0.012,
+                  height: mq.height * 0.025,
                 ),
                 mTextformFeild(
-                    mController: amountController, mHint: "enter amount"),
+                  mKeyboard: TextInputType.number,
+                    mController: amountController, mHint: "Expense Amount"),
                 SizedBox(
-                  height: mq.height * 0.012,
-                ),
-                DropdownButton(
-                  value: selectedTransactionType,
-                  items: transactionType
-                      .map((type) =>
-                          DropdownMenuItem(value: type, child: Text(type)))
-                      .toList(),
-                  onChanged: (value) {
-                    selectedTransactionType = value!;
-                    setState(() {
-                      log("you selected value updated ");
-                    });
-                  },
+                  height: mq.height * 0.025,
                 ),
                 SizedBox(
-                  height: mq.height * 0.012,
-                ),
-                eElevatedBtn(
-                  btnName: "Choose Expense",
-                  newWidget: mCategoriesSelectedIndex != -1
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              AppContants.mCategories[mCategoriesSelectedIndex]
-                                  .catImgPath,
-                              width: 20,
-                              height: 20,
-                            ),
-                            Text(
-                                '- ${AppContants.mCategories[mCategoriesSelectedIndex].catTitle}')
-                          ],
-                        )
-                      : null,
-                  onTap: () {
-                    showModalBottomSheet(
-                      shape: const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(15))),
-                      context: context,
-                      builder: (context) => GridView.builder(
-                        itemCount: AppContants.mCategories.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4),
-                        itemBuilder: (context, index) {
-                          var eachCat = AppContants.mCategories[index];
-
-                          return InkWell(
-                            onTap: () {
-                              mCategoriesSelectedIndex = index;
-
-                              // select id instead
-                           //   eachCat.catId;   store in database
-
-                              setState(() {
-                                log("$mCategoriesSelectedIndex  is index updated");
-                              });
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.amber,
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: Image.asset(
-                                  eachCat.catImgPath,
-                                ),
-                              ),
-                            ),
-                          );
+                  width: mq.width,
+                  child: Card(
+                    child: Center(
+                      child: DropdownButton(
+                        value: selectedTransactionType,
+                        items: transactionType
+                            .map((type) =>
+                                DropdownMenuItem(value: type, child: Text(type)))
+                            .toList(),
+                        onChanged: (value) {
+                          selectedTransactionType = value!;
+                          setState(() {
+                            log("you selected value updated ");
+                          });
                         },
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: mq.height * 0.012,
                 ),
-                eElevatedBtn(
-                  btnName: DateFormat.yMMMd().format(expenseDate),
-                  onTap: () {
-                    selectExpDate();
-                    log("on Pressed!! user not select date ${expenseDate.toString()}");
-                  },
+                SizedBox(
+                  width: mq.width,
+                  child: eElevatedBtn(
+                    btnName: "Choose Expense",
+                    newWidget: mCategoriesSelectedIndex != -1
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                AppContants.mCategories[mCategoriesSelectedIndex]
+                                    .catImgPath,
+                                width: 20,
+                                height: 20,
+                              ),
+                              Text(
+                                  '- ${AppContants.mCategories[mCategoriesSelectedIndex].catTitle}')
+                            ],
+                          )
+                        : null,
+                    onTap: () {
+                      showModalBottomSheet(
+                        useSafeArea: true,
+                        shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(15))),
+                        context: context,
+                        builder: (context) => GridView.builder(
+                          itemCount: AppContants.mCategories.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4),
+                          itemBuilder: (context, index) {
+                            var eachCat = AppContants.mCategories[index];
+
+                            return InkWell(
+                              onTap: () {
+                                mCategoriesSelectedIndex = index;
+
+                                // select id instead
+                             //   eachCat.catId;   store in database
+
+                                setState(() {
+                                  log("$mCategoriesSelectedIndex  is index updated");
+                                });
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.all(11),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Image.asset(
+                                    eachCat.catImgPath,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: mq.height * 0.012,
                 ),
-                eElevatedBtn(
-                  btnName: "Add Expense",
-                  onTap: () {
-                    var mBalance = widget.balance;
+                SizedBox(
+                  width: mq.width,
+                  child: eElevatedBtn(
+                    btnName: DateFormat.yMMMd().format(expenseDate),
+                    onTap: () {
+                      selectExpDate();
+                      log("on Pressed!! user not select date ${expenseDate.toString()}");
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: mq.height * 0.012,
+                ),
+                SizedBox(
+                  width: mq.width,
+                  child: eElevatedBtn(
+                    btnName: "Add Expense",
+                    onTap: () {
+                      var mBalance = widget.balance;
 
-                    if (selectedTransactionType == "Debit") {
-                      mBalance -= int.parse(amountController.text.toString());
-                    } else {
-                      mBalance += int.parse(amountController.text.toString());
-                    }
+                      if (selectedTransactionType == "Debit") {
+                        mBalance -= int.parse(amountController.text.toString());
+                      } else {
+                        mBalance += int.parse(amountController.text.toString());
+                      }
 
-                    var newExpense = ExpenseModel(
-                        uId: 0, //  uId: AppDatabase.LOGIN_UID, store prefs UId
-                        expType: selectedTransactionType == "Debit" ? 0 : 1,
-                        expTitle: titleController.text.toString(),
-                        expTimeStamp:
-                            expenseDate.millisecondsSinceEpoch.toString(),
-                        expId: 0,
-                        expDesc: descController.text.toString(),
-                        expCatType: mCategoriesSelectedIndex,
-                        expBalance: mBalance,
-                        expAmount: int.parse(amountController.text.toString()));
+                      var newExpense = ExpenseModel(
+                          uId: 0, //  uId: AppDatabase.LOGIN_UID, store prefs UId
+                          expType: selectedTransactionType == "Debit" ? 0 : 1,
+                          expTitle: titleController.text.toString(),
+                          expTimeStamp:
+                              expenseDate.millisecondsSinceEpoch.toString(),
+                          expId: 0,
+                          expDesc: descController.text.toString(),
+                          expCatType: mCategoriesSelectedIndex,
+                          expBalance: mBalance,
+                          expAmount: int.parse(amountController.text.toString()));
 
-                    BlocProvider.of<ExpenseBloc>(context)
-                        .add(AddExpenseEvent(addExpense: newExpense));
+                      BlocProvider.of<ExpenseBloc>(context)
+                          .add(AddExpenseEvent(addExpense: newExpense));
 
-                    Navigator.pop(context);
-                  },
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
               ],
             ),

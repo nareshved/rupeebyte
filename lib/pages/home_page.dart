@@ -8,8 +8,6 @@ import 'package:rupeebyte/constants/dark_theme_manager/dark_theme.dart';
 import 'package:rupeebyte/constants/date_time_utils/date_time_utils.dart';
 import '../models/date_wise_expense_model.dart';
 import '../models/expense_model.dart';
-import 'add_expense.dart';
-
 import 'stats_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,14 +20,14 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-
   List<DateWiseExpenseModel> dateWiseExpense = [];
-  List<ExpenseModel> allExpenses = [];  // for passing data to stats graphs page to filterCatWiseData
- // List<MonthWiseExpenseModel> monthWiseExpensenK = [];
+  List<ExpenseModel> allExpenses =
+      []; // for passing data to stats graphs page to filterCatWiseData
+  // List<MonthWiseExpenseModel> monthWiseExpensenK = [];
 
 //  var dateFormat = DateFormat.yMMMEd(); //my choice DateFormat.yMMMEd();
 
-  num lastBalance = 0.0;
+  static num lastBalance = 0.0;
 
   @override
   void initState() {
@@ -47,39 +45,18 @@ class HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Home Expense"),
-        actions: [
-          Switch(
-            value: context.watch<ThemeProvider>().themeValue,
-            onChanged: (value) {
-              context.read<ThemeProvider>().themeValue = value;
-            },
-          ),
-        ],
+        title: const Text("Expenses"),
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => StatsPage(mData: allExpenses,)));
-            },
-            child: const Icon(Icons.bar_chart),
-          ),
-          FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddExpensePage(
-                      balance: lastBalance,
-                    ),
-                  ));
-            },
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => StatsPage(
+                    mData: allExpenses,
+                  )));
+        },
+        child: const Icon(Icons.bar_chart),
       ),
       body: SafeArea(
         child: BlocBuilder<ExpenseBloc, ExpenseStates>(
@@ -116,8 +93,8 @@ class HomePageState extends State<HomePage> {
               } else {
                 return const Center(
                   child: Text(
-                    "NO Expense found add new!!!",
-                    style: TextStyle(fontSize: 13),
+                    "NO Expenses Found!",
+                    style: TextStyle(fontSize: 17),
                   ),
                 );
               }
@@ -219,19 +196,21 @@ class HomePageState extends State<HomePage> {
                 itemBuilder: (context, childIndex) {
                   var eachTrans = eachItem.allTransactions[childIndex];
 
-                  return ListTile(
-                    leading: Image.asset(
-                        height: 30,
-                        AppContants
-                            .mCategories[eachTrans.expCatType].catImgPath),
-                    title: Text(eachTrans.expTitle),
-                    subtitle: Text(eachTrans.expDesc),
-                    trailing: Column(
-                      children: [
-                        Text(eachTrans.expAmount.toString()),
-                        Text(eachTrans.expBalance.toString()),
-                        // main balance will added here
-                      ],
+                  return Card(
+                    child: ListTile(
+                      leading: Image.asset(
+                          height: 30,
+                          AppContants
+                              .mCategories[eachTrans.expCatType].catImgPath),
+                      title: Text(eachTrans.expTitle),
+                      subtitle: Text(eachTrans.expDesc),
+                      trailing: Column(
+                        children: [
+                          Text(eachTrans.expAmount.toString()),
+                          Text(eachTrans.expBalance.toString()),
+                          // main balance will added here
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -301,7 +280,7 @@ class HomePageState extends State<HomePage> {
 
         if (date == mDate) {
           eachDateExp.add(eachExp);
-       //   log("this is each date ${eachDateExp.toString()}");
+          //   log("this is each date ${eachDateExp.toString()}");
 
           if (eachExp.expType == 0) {
             // Debit

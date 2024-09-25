@@ -32,7 +32,7 @@ class _StatsPageState extends State<StatsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Stats Page"),
+        title: const Text("Stats"),
       ),
       // body: Column(
       //   children: [Expanded(child: Container()), Expanded(child: Container())],
@@ -42,14 +42,17 @@ class _StatsPageState extends State<StatsPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: DChartBarO(
-                fillColor: (group, ordinalData, index) {
-                  return Colors.lightBlueAccent;
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: DChartBarO(
+                  fillColor: (group, ordinalData, index) {
+                    return Colors.lightBlueAccent;
 
-                },
-                groupList: listOrdinalGrp,
+                  },
+                  groupList: listOrdinalGrp,
+                ),
               ),
             ),
             Expanded(
@@ -73,19 +76,21 @@ class _StatsPageState extends State<StatsPage> {
                           itemBuilder: (context, childIndex) {
                             var eachTrans = eachItem.allTransactions[childIndex];
 
-                            return ListTile(
-                              leading: Image.asset(
-                                  height: 30,
-                                  AppContants
-                                      .mCategories[eachTrans.expCatType].catImgPath),
-                              title: Text(eachTrans.expTitle),
-                              subtitle: Text(eachTrans.expDesc),
-                              trailing: Column(
-                                children: [
-                                  Text(eachTrans.expAmount.toString()),
-                                  Text(eachTrans.expBalance.toString()),
-                                  // main balance will added here
-                                ],
+                            return Card(
+                              child: ListTile(
+                                leading: Image.asset(
+                                    height: 30,
+                                    AppContants
+                                        .mCategories[eachTrans.expCatType].catImgPath),
+                                title: Text(eachTrans.expTitle),
+                                subtitle: Text(eachTrans.expDesc),
+                                trailing: Column(
+                                  children: [
+                                    Text(eachTrans.expAmount.toString()),
+                                    Text(eachTrans.expBalance.toString()),
+                                    // main balance will added here
+                                  ],
+                                ),
                               ),
                             );
                           },
