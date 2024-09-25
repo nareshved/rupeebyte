@@ -20,6 +20,7 @@ class _ExpenseBottomNavbarHomeState extends State<ExpenseBottomNavbarHome> {
   ];
 
   var mSelectedIndex = 0;
+ // var mSelectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {

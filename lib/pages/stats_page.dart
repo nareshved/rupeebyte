@@ -20,6 +20,7 @@ class _StatsPageState extends State<StatsPage> {
 
   List<OrdinalGroup> listOrdinalGrp = [] ;
   List<OrdinalData> listOrdinalData = [] ;
+ // List<OrdinalData> listOrdinalData = [] ;
 
 
   @override
