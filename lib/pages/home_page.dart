@@ -4,7 +4,6 @@ import 'package:rupeebyte/bloc/expense_bloc.dart';
 import 'package:rupeebyte/bloc/expense_events.dart';
 import 'package:rupeebyte/bloc/expense_states.dart';
 import 'package:rupeebyte/constants/app_constants.dart';
-import 'package:rupeebyte/constants/dark_theme_manager/dark_theme.dart';
 import 'package:rupeebyte/constants/date_time_utils/date_time_utils.dart';
 import '../models/date_wise_expense_model.dart';
 import '../models/expense_model.dart';
