@@ -72,7 +72,6 @@ class AddExpensePageState extends State<AddExpensePage> {
                   height: mq.height * 0.025,
                 ),
                 mTextformFeild(
-                  mKeyboard: TextInputType.number,
                     mController: amountController, mHint: "Expense Amount"),
                 SizedBox(
                   height: mq.height * 0.025,

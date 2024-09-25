@@ -5,6 +5,7 @@ import 'package:rupeebyte/bloc/expense_events.dart';
 import 'package:rupeebyte/bloc/expense_states.dart';
 import 'package:rupeebyte/constants/app_constants.dart';
 import 'package:rupeebyte/constants/date_time_utils/date_time_utils.dart';
+import 'package:rupeebyte/pages/add_expense.dart';
 import '../models/date_wise_expense_model.dart';
 import '../models/expense_model.dart';
 import 'stats_page.dart';
@@ -46,16 +47,31 @@ class HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("Expenses"),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => StatsPage(
-                    mData: allExpenses,
-                  )));
-        },
-        child: const Icon(Icons.bar_chart),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          AddExpensePage(balance: lastBalance)));
+            },
+            child: const Icon(Icons.add),
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => StatsPage(
+                            mData: allExpenses,
+                          )));
+            },
+            child: const Icon(Icons.bar_chart),
+          ),
+        ],
       ),
       body: SafeArea(
         child: BlocBuilder<ExpenseBloc, ExpenseStates>(

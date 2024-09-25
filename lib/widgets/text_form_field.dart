@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
 
-Widget mTextformFeild ({required TextEditingController mController, required mHint, TextInputType? mKeyboard}) {
+Widget mTextformFeild ({required TextEditingController mController, required mHint,}) {
  return TextFormField(
-  keyboardType: mKeyboard,
+
   controller: mController,
   decoration: InputDecoration(
     hintText: mHint,

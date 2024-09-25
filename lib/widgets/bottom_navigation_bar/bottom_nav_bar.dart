@@ -12,37 +12,31 @@ class ExpenseBottomNavbarHome extends StatefulWidget {
 }
 
 class _ExpenseBottomNavbarHomeState extends State<ExpenseBottomNavbarHome> {
-
   List<Widget> navBottomPages = [
     const HomePage(),
-    AddExpensePage(balance: HomePageState.lastBalance,),
+    AddExpensePage(
+      balance: HomePageState.lastBalance,
+    ),
     const SettingsPage(),
   ];
 
   var mSelectedIndex = 0;
- // var mSelectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-
-      selectedIndex: mSelectedIndex,
+        selectedIndex: mSelectedIndex,
         onDestinationSelected: (index) {
           mSelectedIndex = index;
-          setState(() {
-
-          });
+          setState(() {});
         },
-
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_filled), label: "Home"),
-          NavigationDestination(
-              icon: Icon(Icons.edit), label: "Add Expense"),
+          NavigationDestination(icon: Icon(Icons.edit), label: "Add Expense"),
           NavigationDestination(icon: Icon(Icons.settings), label: "Settings"),
         ],
       ),
-
       body: navBottomPages[mSelectedIndex],
     );
   }
